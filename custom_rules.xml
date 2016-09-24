@@ -1,0 +1,29 @@
+<project xmlns='antlib:org.apache.tools.ant'>
+
+
+    <target name="-pre-build">
+        <exec executable="ndk-build" failonerror="true"/>
+     </target> 
+
+    <target name="clean" depends="android_rules.clean">
+        <exec executable="$(ndk-dir)/ndk-build" failonerror="true">
+                <arg value="clean"/>
+        </exec>
+    </target>
+
+    <target name="-post-package">
+        <exec executable="androsign" failonerror="false" failifexecutionfails="false">
+                <arg value="bin/test2-release-unsigned.apk"/>
+        </exec>
+        <!--copy file="bin/test2-release-unsigned-signed.apk" tofile="test2.apk"/-->
+        <exec executable="cp" failonerror="false" failifexecutionfails="false">
+                <arg value="bin/test2-release-unsigned-signed.apk"/>
+                <arg value="test2.apk"/>
+        </exec>
+
+    </target>
+
+</project>
+
+
+
