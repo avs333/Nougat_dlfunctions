@@ -16,18 +16,27 @@
 
 static void *app_thread(void *arg);
 
-static void stop_app_thread(struct ctx *ctx) {
-     ctx->should_run = 0;
-     pthread_join(ctx->app_thread, 0);
+static void stop_app_thread(struct ctx *ctx) 
+{
+    ctx->should_run = 0;
+    pthread_join(ctx->app_thread, 0);
+    ctx->app_thread = 0;	
 }
 
-static void done(struct ctx *ctx) {
+static void done(struct ctx *ctx) 
+{
+    ANativeActivity* activity;
+
     if(!ctx) return;
+    activity = ctx->app->activity;
+    pthread_mutex_lock(&ctx->mutex);
+    if(ctx->app_thread) log_error("internal error: thread not stopped in %s", __func__);
     ft_quit(ctx);
+    pthread_mutex_unlock(&ctx->mutex);	
     pthread_mutex_destroy(&ctx->mutex);
     if(ctx->buffer) free(ctx->buffer);
     free(ctx);
-    ANativeActivity_finish(ctx->app->activity);
+    ANativeActivity_finish(activity);
 }
 
 static void draw_frame(struct ctx* ctx) 
@@ -78,6 +87,8 @@ static void init_window(struct ctx *ctx)
 {
     ANativeWindow_Buffer buffer;
 
+    if(ctx->buffer) return;
+
     log_info(__func__);
     if(ANativeWindow_setBuffersGeometry(ctx->app->window, 0, 0, ctx->fmt) != 0) {
 	log_error("Failed to set buffer format");
@@ -104,7 +115,6 @@ static void init_window(struct ctx *ctx)
 	log_error("failed to create app thread");
 	done(ctx);
     }
- 
 }
 
 static int32_t handle_input(struct android_app* app, AInputEvent* event) 
@@ -132,7 +142,9 @@ static void handle_cmd(struct android_app* app, int32_t cmd)
     switch(cmd) {
 	case APP_CMD_INIT_WINDOW:
 	    log_info("APP_CMD_INIT_WINDOW");	
+	    pthread_mutex_lock(&ctx->mutex);
 	    init_window(ctx);
+	    pthread_mutex_unlock(&ctx->mutex);
 	    draw_frame(ctx);
 	    break;
 	case APP_CMD_WINDOW_REDRAW_NEEDED:
@@ -206,8 +218,8 @@ static char *num2engl(unsigned int num)
     return strdup(tmp);
 }
 
-static void *app_thread(void *arg) {
-
+static void *app_thread(void *arg) 
+{
     struct ctx *ctx = (struct ctx *) arg;
     int  k = 0, stride_bytes, bytes_per_font_height, pixels_per_font_height, 
 	 lines, cur_lines, max_lines, target_width, start_x, start_y;   
@@ -241,6 +253,7 @@ static void *app_thread(void *arg) {
 	    }	 
 	    if(ft_get_string_metrics(ctx, c, target_width, &lines) != 0) {
 		log_error("ft_get_string_metrics failed");
+            	pthread_mutex_unlock(&ctx->mutex);	
 		break;	
 	    }	
 	    if(lines + cur_lines >= max_lines) {	/* scroll up window buffer by "lines" */
@@ -256,7 +269,10 @@ static void *app_thread(void *arg) {
 		memset(ptr + cur_lines * bytes_per_font_height, 0, (max_lines - cur_lines) * bytes_per_font_height);
 	    } 
 
-	    if(ft_render_string(ctx, c, start_x, start_y + cur_lines * pixels_per_font_height, target_width) != 0) break;
+	    if(ft_render_string(ctx, c, start_x, start_y + cur_lines * pixels_per_font_height, target_width) != 0) {
+		pthread_mutex_unlock(&ctx->mutex);
+		break;
+	    }	
 	    cur_lines += lines;
             pthread_mutex_unlock(&ctx->mutex);	
 
@@ -275,7 +291,6 @@ extern int test_cplusplus();
 
 void android_main(struct android_app* app) 
 {
-
     struct ctx *ctx = 0;
     int ident, events;
     struct android_poll_source* source;
