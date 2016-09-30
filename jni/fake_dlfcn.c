@@ -56,7 +56,7 @@ void *fake_dlopen(const char *libpath, int flags)
     off_t load_addr, size;
     int k, fd = -1, found = 0;
     void *shoff;
-    Elf_Ehdr *elf = 0;
+    Elf_Ehdr *elf = MAP_FAILED;
 
 #define fatal(fmt,args...) do { log_err(fmt,##args); goto err_exit; } while(0)
 
@@ -139,7 +139,7 @@ void *fake_dlopen(const char *libpath, int flags)
 
     err_exit:
 	if(fd >= 0) close(fd);
-	if(elf) munmap(elf, size);
+	if(elf != MAP_FAILED) munmap(elf, size);
 	fake_dlclose(ctx);
     return 0;
 }
