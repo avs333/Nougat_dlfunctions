@@ -118,9 +118,10 @@ void *fake_dlopen(const char *libpath, int flags)
 		    break;	
 
 		case SHT_PROGBITS:
+		    if(!ctx->dynstr || !ctx->dynsym) break;
 		    /* won't even bother checking against the section name */
 		    ctx->bias = (off_t) sh->sh_addr - (off_t) sh->sh_offset; 
-		    if(ctx->dynstr && ctx->dynsym) k = elf->e_shnum;  /* exit for */
+		    k = elf->e_shnum;  /* exit for */
 		    break;
 	    }
 	}
