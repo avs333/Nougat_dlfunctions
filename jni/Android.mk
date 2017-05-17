@@ -25,7 +25,7 @@ LOCAL_CFLAGS	+= -DTESTCPP
 endif
 LOCAL_CFLAGS	+= -DHANDLE_UNICODE=1
 LOCAL_LDLIBS    := -llog -landroid
-LOCAL_STATIC_LIBRARIES := android_native_app_glue tinker
+LOCAL_STATIC_LIBRARIES := android_native_app_glue
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include/freetype
 include $(BUILD_SHARED_LIBRARY)
 
