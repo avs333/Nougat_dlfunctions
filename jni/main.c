@@ -161,10 +161,11 @@ static void handle_cmd(struct android_app* app, int32_t cmd)
     }
 }
 
+/* Terrible bug corrected: https://groups.google.com/d/msg/alt.usage.english/4t0PAe9-QGc/H2Jb2SJQBgAJ */
 
 static const char *low_nums[] = { 0, "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
 	"eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen" };
-static const char *ten_multiples[] = { 0, 0, "twenty", "thirty", "fourty", "fifty", "sixty", "seventy", "eighty", "ninety" };
+static const char *ten_multiples[] = { 0, 0, "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety" };
 static const char *large_nums[] = { "billion", "million", "thousand", 0 };
 static const int large_vals[] = { 1000000000, 1000000, 1000, 0 };
 
