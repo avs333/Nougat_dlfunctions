@@ -171,7 +171,7 @@ static const int large_vals[] = { 1000000000, 1000000, 1000, 0 };
 
 /* Numerals in the English language are spoken in triples each consisting 
    of the number of hundreds (if any) possibly followed by "and" and the lesser number, e.g.:
-   909,168,442 is "nine hundred and nine million one hundered and sixty-eight thousand four hundred and fourty-two" */
+   909,168,442 is "nine hundred and nine million one hundered and sixty-eight thousand four hundred and forty-two" */
 
 static char *triple(char *out, int num)
 {
