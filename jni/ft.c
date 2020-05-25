@@ -60,8 +60,11 @@ int ft_init(struct ctx *c)
 
 #ifdef __arm__
     ctx->ftlib = fake_dlopen("/system/lib/libft2.so", RTLD_NOW);
+    /* NB: /system/vendor/lib and /vendor/lib to be checked for libs like libssl */	    	
 #else
     ctx->ftlib = fake_dlopen("/system/lib64/libft2.so", RTLD_NOW);
+    /* NB: /system/vendor/lib64 and /vendor/lib64 to be checked for libs like libssl */
+    if(!ctx->ftlib) ctx->ftlib = fake_dlopen("/apex/com.android.conscrypt/lib64/libft2.so", RTLD_NOW);		    	
 #endif
     log_info("fake_dlopen for libft2.so returned %p", ctx->ftlib);
 
